@@ -91,3 +91,7 @@ env/
     .ropeproject
     
     db.sqlite3
+    .chroma.sqlite3
+
+    .pdf
+    .chroma_db
