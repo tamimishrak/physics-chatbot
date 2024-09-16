@@ -1,7 +1,20 @@
-import React from 'react'
+import { Outlet } from 'react-router-dom';
+import './RootLayout.css';
 
-export default function RootLayout() {
+const RootLayout = () => {
   return (
-    <div>RootLayout</div>
+    <div className='rootLayout'>
+      <header>
+        <div className='logo'>
+          <img src='/logo.png'/>
+          <span>PhyMate</span>
+        </div>
+      </header>
+      <main>
+        <Outlet />
+      </main>
+    </div>
   )
 }
+
+export default RootLayout;
