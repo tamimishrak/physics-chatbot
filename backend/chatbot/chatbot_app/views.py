@@ -15,6 +15,12 @@ class ChatSessionsView(APIView):
             return Response({"error": str(e)}, status=500)
 
 class SingleSessionView(APIView):
-    def get(self, request, session_id) :
-        session_id = 1123123
-        return Response({"message": session_id}, status=200)     
+    # getting a single session with an id
+    def get(self, request, session_id):
+        try:
+            messages = Message.objects.filter(session__session_id = session_id)
+            serializer = MessageSerializer(messages, many=True)
+            print(serializer.data)
+            return Response(serializer.data, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
