@@ -12,8 +12,8 @@ export default function ChatPage(){
   useEffect(() => {
       if(id){
         async function fetchMessages(){
-          try{
-            const response = await axios.get(http://localhost:8000/api/sessions/${id})
+          try{await axios.get(`http://localhost:8000/api/sessions/${id}`);
+            const response = 
             console.log(response.data);
             if(response.status === 200){
               setMessages(response.data);
