@@ -24,3 +24,12 @@ class SingleSessionView(APIView):
             return Response(serializer.data, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+     # delete the session with an id
+    def delete(self, request, session_id):
+        try:
+            session = ChatSession.objects.get(session_id=session_id)
+            session.delete()
+            return Response(status=204)
+        except ChatSession.DoesNotExist:
+            return Response({"error": "Session does not exist"}, status=404)
