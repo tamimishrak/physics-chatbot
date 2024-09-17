@@ -15,3 +15,22 @@ a{
   text-decoration: none;
   color: inherit;
 }
+
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #605b70;
+}
+
+/* thumb */
+::-webkit-scrollbar-thumb {
+  background: #2c2937;
+}
+
+/* on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #1a1824;
+}

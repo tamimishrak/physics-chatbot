@@ -8,7 +8,8 @@ export default function ChatPage(){
     <div className="chatPage">
       <div className='wrapper'>
         <div className="chat">
-          
+          <div className='message user'>Hello</div>
+          <div className='message'>Hello welcome to phymate</div>
           <Prompt />
         </div>
       </div>

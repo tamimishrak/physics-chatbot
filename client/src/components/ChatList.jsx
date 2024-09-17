@@ -33,7 +33,7 @@ export default function ChatList() {
       <div className="list">
         {
           sessions.length > 0 ? (
-            sessions.map(item => (
+            [...sessions].reverse().map(item => (
               <Link key={item.session_id} to={`/dashboard/sessions/${item.session_id}`}>
                 {item.session_title}
               </Link>
@@ -44,11 +44,11 @@ export default function ChatList() {
         }
       </div>
       <hr />
-      <div className="upgrade">
+      <div className="us">
         <img src="/logo.png" alt="" />
         <div className="texts">
-          <span>Upgrade to PhyMate Pro</span>
-          <span>Get unlimited access to all features</span>
+          <span>Made by us</span>
+          <span>Unlimited access hehe</span>
         </div>
       </div>
     </div>
