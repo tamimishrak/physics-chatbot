@@ -93,5 +93,6 @@ env/
     db.sqlite3
     .chroma.sqlite3
 
-    .pdf
-    .chroma_db
+    notebook/pdf/
+    notebook/chroma_db/
+

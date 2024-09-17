@@ -1,16 +1,15 @@
 import React from 'react'
 
+import Prompt from '../components/Prompt'
+import "./ChatPage.css"
+
 export default function ChatPage(){
   return (
     <div className="chatPage">
       <div className='wrapper'>
         <div className="chat">
-          {message.map((message, index) => (
-            <div key={index} className={`message ${message.is_bot ? '' : 'user'}`}>
-              {message.text}
-            </div>
-          ))}
-          <NewPrompt onPromptSubmit={handlePromptSubmit} />
+          
+          <Prompt />
         </div>
       </div>
     </div>

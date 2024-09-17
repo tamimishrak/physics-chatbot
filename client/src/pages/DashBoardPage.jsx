@@ -1,5 +1,7 @@
 import React from 'react'
 
+import "./DashBoardPage.css"
+
 export default function DashBoardPage() {
   return (
     <div className="dashboardPage">
@@ -9,7 +11,7 @@ export default function DashBoardPage() {
         </div>
       </div>
       <div className="formContainer">
-        <form onSubmit={handleSubmit}>
+        <form>
           <input type="text" name="text" placeholder="Ask me anything..." />
           <button>
             <img src="/arrow.png" alt="" />

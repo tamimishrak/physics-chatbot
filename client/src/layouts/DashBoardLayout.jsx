@@ -3,6 +3,8 @@ import { Outlet } from 'react-router-dom';
 import './DashBoardLayout.css';
 import ChatList from '../components/ChatList';
 
+import "./DashBoardLayout.css"
+
 export default function DashBoardLayout() {
   return (
     <div className='dashboardLayout'>
