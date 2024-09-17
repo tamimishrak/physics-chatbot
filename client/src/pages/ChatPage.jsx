@@ -13,7 +13,7 @@ export default function ChatPage(){
       if(id){
         async function fetchMessages(){
           try{
-            const response = await axios.get(http://localhost:8000/api/sessions/${id});
+            const response = await axios.get(http://localhost:8000/api/sessions/${id})
             console.log(response.data);
             if(response.status === 200){
               setMessages(response.data);
