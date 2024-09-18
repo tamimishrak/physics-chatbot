@@ -8,7 +8,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-def main():
+def create_vectordb_retriever():
+    # getting the file from the path 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     file_path = os.path.join(os.path.dirname(__file__), 'pdf', 'Physics Classes 9-10.pdf')
 
@@ -24,8 +25,10 @@ def main():
         chunk_overlap=100
     )
 
-    print(f"Creating embeddings using {device}...")
+
     all_splits = text_splitter.split_documents(documents)
+
+    print(f"Creating embeddings using {device}...")
 
     model_name = "sentence-transformers/all-mpnet-base-v2"
     model_kwargs = {"device": device}
@@ -42,8 +45,9 @@ def main():
         embedding=embeddings,
         persist_directory="chroma_db"
     )
-
+    
+    print("Created the vectoddb and the retirever successfully!")
+    
 
 if __name__ == "__main__":
-    main()
-
+    create_vectordb_retriever()
