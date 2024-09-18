@@ -1,9 +1,7 @@
 import torch
-from langchain_community.llms import Ollama
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import Chroma
 import os
 import warnings
@@ -18,10 +16,6 @@ def main():
     print("Loading document...")
     loader = PyPDFLoader(file_path)
     documents = loader.load()
-
-    # adding meta data to each document
-    for doc in documents:
-        doc.metadata = {"source": "Physics Classes 9-10.pdf"}
 
     # Splitting Text
     print("Splitting document...")
