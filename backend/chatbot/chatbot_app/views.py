@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from .models import ChatSession, Message
 from .serializers import ChatSessionSerializer, MessageSerializer
 
+import uuid
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -56,6 +57,30 @@ class ChatSessionsView(APIView):
             serializer = ChatSessionSerializer(chat_sessions, many=True)
             print(serializer.data)
             return Response(serializer.data, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+        
+    def post(self, request):
+        query= request.data.get('text')
+        try:
+            print(f"User Query: {query}")
+            new_session = ChatSession.objects.create(
+                session_id=str(uuid.uuid4()),
+                session_title=query[:25])
+            
+            retrieved_docs = retriever.invoke(query)
+            print(f"Length of retrieved docs {len(retrieved_docs)}")
+            for doc in retrieved_docs:
+                print(f"Doc: {doc.page_content}")
+                print("\n")
+            Message.objects.create(session=new_session, text=query, is_bot=False)
+            answer = generate_answer(query)
+            print(f"Generated answer: {answer}")
+            Message.objects.create(session=new_session, text=answer, is_bot=True)
+            return Response({
+                'id': new_session.session_id,
+                'answer': answer
+                }, status=201)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 

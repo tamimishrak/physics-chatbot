@@ -96,3 +96,55 @@ env/
     notebook/pdf/
     notebook/chroma_db/
 
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# SQLite database files
+*.sqlite3
+*.db
+*.sqlite
+
+# ChromaDB folder and its SQLite files
+chroma_db/
+chroma_db/*.sqlite
+
+# Logs
+*.log
+
+# Django stuff:
+*.env
+*.pot
+*.pyc
+
+# Media / Uploaded files
+media/
+
+# Static files
+staticfiles/
+
+# Local virtual environments
+env/
+venv/
+bin/
+Include/
+Lib/
+Scripts/
+
+# Editor and IDE files
+.vscode/
+.idea/
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Git metadata
+.git/
+
+

@@ -7,13 +7,14 @@ import "./ChatPage.css"
 
 export default function ChatPage(){
   const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState(null);
   const { id } = useParams();
 
   useEffect(() => {
       if(id){
         async function fetchMessages(){
-          try{await axios.get(`http://localhost:8000/api/sessions/${id}`);
-            const response = 
+          try{
+            const response = await axios.get(`http://localhost:8000/api/sessions/${id}`); 
             console.log(response.data);
             if(response.status === 200){
               setMessages(response.data);
@@ -28,6 +29,30 @@ export default function ChatPage(){
       }
   }, [id]);
 
+  const handlePromptSubmit = async (newMessage) => {
+    try {
+      let response;
+      if (id) {
+        response = await axios.post(`http://localhost:8000/api/sessions/${id}/`, { text: newMessage });
+      } else {
+        response = await axios.post('http://localhost:8000/api/sessions/', { text: newMessage });
+        const newSessionId = response.data.session_id;
+        setSessionId(newSessionId);
+        navigate(`/dashboard/sessions/${newSessionId}`);
+      }
+
+      // updating user and bot messages
+      const botMessage = response.data.answer;
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: newMessage, is_bot: false },
+        { text: botMessage, is_bot: true }
+      ]);
+    } catch (error) {
+      alert('Failed to send the message');
+    }
+  };
+
   return (
     <div className="chatPage">
       <div className='wrapper'>
@@ -39,7 +64,7 @@ export default function ChatPage(){
               </div>
             ))
           }
-          <Prompt />
+          <Prompt onPromptSubmit={handlePromptSubmit} />
         </div>
       </div>
     </div>
