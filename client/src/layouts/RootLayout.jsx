@@ -7,7 +7,7 @@ const RootLayout = () => {
     <div className='rootLayout'>
       <header>
         <div className='logo'>
-          <img src='/logo.png'/>
+          {/* <img src='/logo.png'/> */}
           <span>PhyMate</span>
         </div>
       </header>

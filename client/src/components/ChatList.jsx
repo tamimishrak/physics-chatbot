@@ -45,7 +45,7 @@ export default function ChatList() {
       </div>
       <hr />
       <div className="us">
-        <img src="/logo.png" alt="" />
+        {/* <img src="/logo.png" alt="" /> */}
         <div className="texts">
           <span>Made by us</span>
           <span>Unlimited access hehe</span>
