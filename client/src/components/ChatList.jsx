@@ -1,11 +1,11 @@
 import {useState, useEffect} from 'react'
-import { Link } from 'react-router-dom'
-
+import { Link } from 'react-router-dom';
 import axios from 'axios'
 import "./ChatList.css"
 
 export default function ChatList() {
   const [sessions, setSessions] = useState([]);
+  const [activeSession, setActiveSession] = useState(null);
 
   useEffect(() =>{
     async function fetchSessions(){
@@ -22,7 +22,27 @@ export default function ChatList() {
       }
     }
     fetchSessions();
-  }, [])
+  }, []);
+
+  const handleDeleteSession = async (sessionId) => {
+    try{
+      const response = await axios.delete(`http://localhost:8000/api/sessions/${sessionId}/`);
+      if(response.status === 204){
+        setSessions(prevSessions => 
+          prevSessions.filter(session => session.session_id !== sessionId)
+        );
+        alert('Session deleted successfully!');
+      } else {
+        alert("Failed to delete session.");
+      }
+    } catch(error){
+      alert(error.message)
+    }
+  };
+
+  const handleClick = (sessionId) => {
+    setActiveSession(sessionId);
+  }
 
   return (
     <div className='chatList'>
@@ -34,9 +54,26 @@ export default function ChatList() {
         {
           sessions.length > 0 ? (
             [...sessions].reverse().map(item => (
-              <Link key={item.session_id} to={`/dashboard/sessions/${item.session_id}`}>
-                {item.session_title}
-              </Link>
+              <div 
+                key={item.session_id} 
+                className="chat-item"
+                onClick={() => handleClick(item.session_id)}  
+              >
+                <Link 
+                  to={`/dashboard/sessions/${item.session_id}`}
+                  className="chat-title"
+                >
+                  {item.session_title}
+                </Link>
+                <button 
+                  className="delete-button" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteSession(item.session_id)
+                  }}>
+                    Delete
+                  </button>
+              </div>
             ))
           ) : (
             <p>No sessions available</p>

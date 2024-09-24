@@ -7,7 +7,6 @@ import "./ChatPage.css"
 
 export default function ChatPage(){
   const [messages, setMessages] = useState([]);
-  const [sessionId, setSessionId] = useState(null);
   const { id } = useParams();
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export default function ChatPage(){
       } else {
         response = await axios.post('http://localhost:8000/api/sessions/', { text: newMessage });
         const newSessionId = response.data.session_id;
-        setSessionId(newSessionId);
         navigate(`/dashboard/sessions/${newSessionId}`);
       }
 
