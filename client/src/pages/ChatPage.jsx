@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import Markdown from 'react-markdown'
 
 import axios from 'axios'
 import Prompt from '../components/Prompt'
@@ -58,7 +59,7 @@ export default function ChatPage(){
           {
             messages.map((message, index) => (
               <div key={index} className={`message ${message.is_bot ? '' : 'user'}`}>
-                {message.text}
+                <Markdown>{message.text}</Markdown>
               </div>
             ))
           }

@@ -16,7 +16,7 @@ export default function Prompt({onPromptSubmit}) {
 
   return (
     <>
-      {question && <div className='message user'>{question}</div>}
+      {/* {question && <div className='message user'>{question}</div>} */}
       <div className='endChat'>
           <form className="newForm" onSubmit={handleSubmit}>
             <input 
