@@ -9,13 +9,22 @@ from langchain import hub
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import ChatSession, Message
-from .serializers import ChatSessionSerializer, MessageSerializer
+from .serializers import ChatSessionSerializer, MessageSerializer, UserSerializer
+from rest_framework import generics
+from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 
 import uuid
 import warnings
 warnings.filterwarnings('ignore')
 
-llm = Ollama(model="llama3")
+# llm/slm
+llama = "llama3"
+gemma = "gemma:2b"
+qwen = "qwen:4b"
+
+llm = Ollama(model=llama)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -128,3 +137,8 @@ class SingleSessionView(APIView):
             return Response(status=204)
         except ChatSession.DoesNotExist:
             return Response({"error": "Session does not exist"}, status=404)
+        
+class CreateUserView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
