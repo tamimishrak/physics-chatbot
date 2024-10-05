@@ -62,7 +62,7 @@ def generate_answer(query):
 class ChatSessionsView(APIView):
     def get(self, request):
         try:
-            chat_sessions = ChatSession.objects.all()
+            chat_sessions = ChatSession.objects.filter(user=request.user)
             serializer = ChatSessionSerializer(chat_sessions, many=True)
             print(serializer.data)
             return Response(serializer.data, status=200)
@@ -74,8 +74,10 @@ class ChatSessionsView(APIView):
         try:
             print(f"User Query: {query}")
             new_session = ChatSession.objects.create(
+                user=request.user,
                 session_id=str(uuid.uuid4()),
-                session_title=query[:25])
+                session_title=query[:25]
+            )
             
             retrieved_docs = retriever.invoke(query)
             print(f"Length of retrieved docs {len(retrieved_docs)}")
@@ -97,7 +99,7 @@ class SingleSessionView(APIView):
     # getting a single session with an id
     def get(self, request, session_id):
         try:
-            messages = Message.objects.filter(session__session_id = session_id)
+            messages = Message.objects.filter(session__session_id = session_id, session__user=request.user)
             serializer = MessageSerializer(messages, many=True)
             print(serializer.data)
             return Response(serializer.data, status=200)
@@ -119,7 +121,7 @@ class SingleSessionView(APIView):
             print(type(answer))
             print(f"Generated answer: {answer}")
 
-            session = ChatSession.objects.get(session_id=session_id)
+            session = ChatSession.objects.get(session_id=session_id, user=request.user)
             Message.objects.create(session=session, text=query, is_bot=False)
             Message.objects.create(session=session, text=answer, is_bot=True)
 
@@ -132,7 +134,7 @@ class SingleSessionView(APIView):
      # delete the session with an id
     def delete(self, request, session_id):
         try:
-            session = ChatSession.objects.get(session_id=session_id)
+            session = ChatSession.objects.get(session_id=session_id, user=request.user)
             session.delete()
             return Response(status=204)
         except ChatSession.DoesNotExist:

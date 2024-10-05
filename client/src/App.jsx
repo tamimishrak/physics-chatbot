@@ -6,6 +6,8 @@ import DashBoardLayout from './layouts/DashBoardLayout';
 import RootLayout from './layouts/RootLayout';
 import SignUpPage from './pages/SignUpPage';
 import SignInPage from './pages/SignInPage';
+import ProtectedRoute from './components/ProtectedRoute';
+
 
 export default function App() {
   const router = createBrowserRouter([
@@ -21,7 +23,7 @@ export default function App() {
           element: <SignInPage />
         },
         {
-          element: <DashBoardLayout />,
+          element: <ProtectedRoute><DashBoardLayout /></ProtectedRoute>,
           children: [
             {
               path: '/dashboard', element: <DashBoardPage />

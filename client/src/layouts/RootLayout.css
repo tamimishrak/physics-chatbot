@@ -28,6 +28,22 @@
           color: transparent;
         }
       }
+      .logout {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #ff5c5c; /* Initial color */
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.3s ease, text-decoration 0.3s ease; /* Smooth transition for color */
+        background: none;
+        border: 0;
+        outline: none;
+      }
+  
+      .logout:hover {
+        color: darkred; /* Change to red on hover */
+        text-decoration: none; /* Optional: underline on hover */
+      }
     }
   
     main {

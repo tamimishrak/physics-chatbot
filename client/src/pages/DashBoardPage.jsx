@@ -12,10 +12,17 @@ export default function DashBoardPage() {
     const text = e.target.text.value;
 
     try{
+      const token = localStorage.getItem("access_token");
+      
       const response = await axios.post(
         `http://localhost:8000/api/sessions/`,
         {text},
-        {withCredentials: true}
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true
+        },
       );
       console.log(response.data);
       const id = response.data.id;

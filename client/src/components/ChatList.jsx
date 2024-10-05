@@ -10,7 +10,12 @@ export default function ChatList() {
   useEffect(() =>{
     async function fetchSessions(){
       try{
-        const response = await axios.get('http://localhost:8000/api/sessions/');
+        const token = localStorage.getItem('access_token');
+        const response = await axios.get('http://localhost:8000/api/sessions/',{
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         console.log(response);
         if(response.status === 200){
           setSessions(response.data);
@@ -26,7 +31,12 @@ export default function ChatList() {
 
   const handleDeleteSession = async (sessionId) => {
     try{
-      const response = await axios.delete(`http://localhost:8000/api/sessions/${sessionId}/`);
+      const token = localStorage.getItem('access_token');
+      const response = await axios.delete(`http://localhost:8000/api/sessions/${sessionId}/`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       if(response.status === 204){
         setSessions(prevSessions => 
           prevSessions.filter(session => session.session_id !== sessionId)

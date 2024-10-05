@@ -14,7 +14,12 @@ export default function ChatPage(){
       if(id){
         async function fetchMessages(){
           try{
-            const response = await axios.get(`http://localhost:8000/api/sessions/${id}`); 
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get(`http://localhost:8000/api/sessions/${id}`,{
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }); 
             console.log(response.data);
             if(response.status === 200){
               setMessages(response.data);
@@ -59,7 +64,7 @@ export default function ChatPage(){
           {
             messages.map((message, index) => (
               <div key={index} className={`message ${message.is_bot ? '' : 'user'}`}>
-                <Markdown>{message.text}</Markdown>
+                {message.text}
               </div>
             ))
           }

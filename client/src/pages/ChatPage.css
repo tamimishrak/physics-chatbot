@@ -20,16 +20,27 @@
   
         p,li{
           margin: 10px 0px;
+          color: white;
         }
   
         .message{
-          padding: 15px;
+          padding: 22px;
+          color: white;
+          border-radius: 10px;
+          max-width: 80%;
+          word-wrap: break-word;
+          display: flex;
+          justify-content: center;
+          align-items: center;
           
           &.user{
             background-color: #2c2937;
-            border-radius: 20px;
-            max-width: 80%;
             align-self: flex-end;
+          }
+
+          &.bot {
+            background-color: #4c4a57;
+            flex: flex-start;
           }
         }
       }
