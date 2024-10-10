@@ -37,10 +37,17 @@ export default function ChatPage(){
   const handlePromptSubmit = async (newMessage) => {
     try {
       let response;
+      const token = localStorage.getItem('access_token');
       if (id) {
-        response = await axios.post(`http://localhost:8000/api/sessions/${id}/`, { text: newMessage });
+        response = await axios.post(`http://localhost:8000/api/sessions/${id}/`, { text: newMessage }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }});
       } else {
-        response = await axios.post('http://localhost:8000/api/sessions/', { text: newMessage });
+        response = await axios.post('http://localhost:8000/api/sessions/', { text: newMessage }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }});
         const newSessionId = response.data.session_id;
         navigate(`/dashboard/sessions/${newSessionId}`);
       }
