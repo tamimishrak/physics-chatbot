@@ -5,6 +5,7 @@ from langchain_chroma import Chroma
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain import hub
+from langchain.prompts import PromptTemplate
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -36,11 +37,29 @@ embeddings = HuggingFaceEmbeddings(
     model_kwargs=model_kwargs
 ) 
 
-prompt = hub.pull("rlm/rag-prompt")
+prompt = PromptTemplate.from_template(
+    """
+    You are a physics chatbot which answers only physics based questions and you are actually great at it.
+    You can answer all conceptual, mathematical, follow-up questions related to physics accurately.
+    You should use the following pieces of context to answer the question at the end. If you 
+    can't find the answer directly in the context provided, just respond with 
+    "I can't answer this question. I don't know."
+    Answer only those questions that are relevant to physics or the context.
+    Do not answer any questions that are irrelevant to physics or from other background such as finance, business, law etc.
+
+    {context}
+
+    Question: {question}
+    Answer:
+    """
+)
 
 vector_db = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
 
-retriever = vector_db.as_retriever(search_type="mmr")
+retriever = vector_db.as_retriever(
+    search_type="similarity_score_threshold",
+    search_kwargs={"score_threshold": 0.4}
+)
 
 # Format the retrieved documents
 def format_docs(docs):

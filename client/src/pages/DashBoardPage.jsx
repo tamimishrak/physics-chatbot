@@ -13,7 +13,7 @@ export default function DashBoardPage() {
 
     try{
       const token = localStorage.getItem("access_token");
-      
+      console.log(token);
       const response = await axios.post(
         `http://localhost:8000/api/sessions/`,
         {text},
@@ -21,7 +21,6 @@ export default function DashBoardPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          withCredentials: true
         },
       );
       console.log(response.data);
