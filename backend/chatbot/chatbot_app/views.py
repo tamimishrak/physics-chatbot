@@ -99,18 +99,34 @@ class ChatSessionsView(APIView):
             )
             
             retrieved_docs = retriever.invoke(query)
+
             print(f"Length of retrieved docs {len(retrieved_docs)}")
+            
             for doc in retrieved_docs:
                 print(f"Doc: {doc.page_content}")
                 print("\n")
+            
             Message.objects.create(session=new_session, text=query, is_bot=False)
+            
+            if not retrieved_docs:
+                t = "I don't know the answer."
+                Message.objects.create(session=new_session, text=t, is_bot=True)
+                
+                return Response({
+                'id': new_session.session_id,
+                'answer': t
+                }, status=201) 
+            
             answer = generate_answer(query)
             print(f"Generated answer: {answer}")
+            
             Message.objects.create(session=new_session, text=answer, is_bot=True)
+            
             return Response({
                 'id': new_session.session_id,
                 'answer': answer
                 }, status=201)
+        
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
@@ -130,18 +146,25 @@ class SingleSessionView(APIView):
         try:
             query = request.data.get('text')
             print(f"User query: {query}")
+
             retrieved_docs = retriever.invoke(query)
+
             print(f"Length of retrieved docs {len(retrieved_docs)}")
             for doc in retrieved_docs:
                 print(f"Doc: {doc.page_content}")
                 print("\n")
 
-            answer = generate_answer(query)
-            print(type(answer))
-            print(f"Generated answer: {answer}")
-
             session = ChatSession.objects.get(session_id=session_id, user=request.user)
             Message.objects.create(session=session, text=query, is_bot=False)
+
+            if not retrieved_docs:
+                t = "I don't know the answer."
+                Message.objects.create(session=session, text=t, is_bot=True)
+                return Response({"answer": t}, status=200)
+
+            answer = generate_answer(query)
+            print(type(answer))
+            print(f"Generated answer: {answer}")    
             Message.objects.create(session=session, text=answer, is_bot=True)
 
             return Response({"answer": answer}, status=200)
