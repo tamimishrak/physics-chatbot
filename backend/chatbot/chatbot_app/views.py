@@ -5,7 +5,18 @@ from langchain_chroma import Chroma
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain import hub
+
+from langchain.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
+
 from langchain.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import MessagesPlaceholder
+
+from langchain.chains import create_history_aware_retriever
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.messages import HumanMessage, AIMessage
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,7 +25,6 @@ from .serializers import ChatSessionSerializer, MessageSerializer, UserSerialize
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
 
 import uuid
 import warnings
@@ -26,6 +36,8 @@ gemma = "gemma:2b"
 qwen = "qwen:4b"
 
 llm = Ollama(model=llama)
+
+set_llm_cache(InMemoryCache())
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -39,13 +51,10 @@ embeddings = HuggingFaceEmbeddings(
 
 prompt = PromptTemplate.from_template(
     """
-    You are a physics chatbot which answers only physics based questions and you are actually great at it.
-    You can answer all conceptual, mathematical, follow-up questions related to physics accurately.
-    You should use the following pieces of context to answer the question at the end. If you 
-    can't find the answer directly in the context provided, just respond with 
-    "I can't answer this question. I don't know."
-    Answer only those questions that are relevant to physics or the context.
-    Do not answer any questions that are irrelevant to physics or from other background such as finance, business, law etc.
+    You are an assistant aimed to answer only physics based questions.
+    You should use the following pieces of context to answer the question at the end. 
+    If you don't know the answer, say that you don't know.
+    Do not answer any questions that are irrelevant to physics and Keep the answer concise.
 
     {context}
 
@@ -57,8 +66,7 @@ prompt = PromptTemplate.from_template(
 vector_db = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
 
 retriever = vector_db.as_retriever(
-    search_type="similarity_score_threshold",
-    search_kwargs={"score_threshold": 0.4}
+    search_type="mmr"
 )
 
 # Format the retrieved documents
@@ -66,12 +74,55 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 # Define the RAG chain
+"""
 rag_chain = (
     {"context": retriever | format_docs, "question": RunnablePassthrough()}
     | prompt
     | llm
     | StrOutputParser()
 )
+"""
+retriever_prompt = (
+    "You are an assistant aimed to answer only physics based questions."
+    "You should use the following pieces of context to answer the question at the end." 
+    "If you don't know the answer, say that you don't know."
+    "Do not answer any questions that are irrelevant to physics and Keep the answer concise."
+    "Given a chat history and the latest user question which might reference context in the chat history,"
+    "formulate a standalone question which can be understood without the chat history."
+    "Do NOT answer the question, just reformulate it if needed and otherwise return it as is."
+)
+
+contextualize_q_prompt  = ChatPromptTemplate.from_messages(
+    [
+        ("system", retriever_prompt),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{input}"),    ]
+)
+
+history_aware_retriever = create_history_aware_retriever(llm,retriever,contextualize_q_prompt)
+
+system_prompt = (
+    "You are an assistant for question-answering tasks. "
+    "Use the following pieces of retrieved context to answer the question "
+    "If you don't know the answer, say that you don't know."
+    "Keep the answer concise."
+    "\n\n"
+    "{context}"
+)
+
+qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+
+question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+
+rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+chat_history = []
 
 def generate_answer(query):
     response = rag_chain.invoke(query)
@@ -108,6 +159,8 @@ class ChatSessionsView(APIView):
             
             Message.objects.create(session=new_session, text=query, is_bot=False)
             
+            chat_history = []
+
             if not retrieved_docs:
                 t = "I don't know the answer."
                 Message.objects.create(session=new_session, text=t, is_bot=True)
@@ -117,7 +170,17 @@ class ChatSessionsView(APIView):
                 'answer': t
                 }, status=201) 
             
-            answer = generate_answer(query)
+            #answer = generate_answer(query)
+            response = rag_chain.invoke({"input": query, "chat_history": chat_history})
+            answer = response["answer"]
+
+            chat_history.extend(
+                [
+                    HumanMessage(content=query),
+                    AIMessage(content=answer),
+                ]
+            )
+
             print(f"Generated answer: {answer}")
             
             Message.objects.create(session=new_session, text=answer, is_bot=True)
@@ -157,12 +220,29 @@ class SingleSessionView(APIView):
             session = ChatSession.objects.get(session_id=session_id, user=request.user)
             Message.objects.create(session=session, text=query, is_bot=False)
 
+            messages = Message.objects.filter(session=session).order_by("m_created_at")
+
+            chat_history = [
+                HumanMessage(content=msg.text) if not msg.is_bot else AIMessage(content=msg.text)
+                for msg in messages
+            ]
+
             if not retrieved_docs:
                 t = "I don't know the answer."
                 Message.objects.create(session=session, text=t, is_bot=True)
                 return Response({"answer": t}, status=200)
 
-            answer = generate_answer(query)
+            #answer = generate_answer(query)
+            response = rag_chain.invoke({"input": query, "chat_history": chat_history})
+            answer = response["answer"]
+
+            chat_history.extend(
+                [
+                    HumanMessage(content=query),
+                    AIMessage(content=answer),
+                ]
+            )
+
             print(type(answer))
             print(f"Generated answer: {answer}")    
             Message.objects.create(session=session, text=answer, is_bot=True)
